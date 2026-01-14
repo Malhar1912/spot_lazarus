@@ -1,0 +1,5 @@
+{
+  "name": "Spot-Lazarus",
+  "description": "A UI simulation for an ephemeral development environment gateway, focusing on FinOps visibility and state management.",
+  "requestFramePermissions": []
+}
