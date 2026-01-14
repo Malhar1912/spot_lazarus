@@ -3,7 +3,8 @@ export enum AppState {
   STARTING = 'STARTING',
   READY = 'READY',
   ACTIVE = 'ACTIVE',
-  SLEEPING = 'SLEEPING' // The transition state back to offline
+  SLEEPING = 'SLEEPING', // The transition state back to offline
+  DEPLOYING = 'DEPLOYING'
 }
 
 export interface LogStep {

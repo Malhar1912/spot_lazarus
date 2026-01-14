@@ -11,6 +11,15 @@ export const STARTUP_SEQUENCE: Omit<LogStep, 'status'>[] = [
   { id: '7', message: 'Running health checks', icon: 'TestTube' },
 ];
 
+export const DEPLOYMENT_SEQUENCE: Omit<LogStep, 'status'>[] = [
+  { id: 'd1', message: 'Pushing code to GitHub', icon: 'UploadCloud' },
+  { id: 'd2', message: 'Cloud Build triggered', icon: 'Zap' },
+  { id: 'd3', message: 'Building Docker image', icon: 'Box' },
+  { id: 'd4', message: 'Pushing to Artifact Registry', icon: 'Layers' },
+  { id: 'd5', message: 'Deploying Cloud Run service', icon: 'Server' },
+  { id: 'd6', message: 'Gateway service started', icon: 'PlayCircle' },
+];
+
 export const COST_DATA: CostTier[] = [
   { name: 'Idle (Storage)', cost: 0.04, type: 'idle', description: 'Environment sleeping' },
   { name: 'Active (Spot)', cost: 0.14, type: 'spot', description: 'Current Mode' },
