@@ -1,4 +1,6 @@
 import { SimulationProfile, LogStep } from './types';
+
+// 1. Payments API Logs
 const PAYMENTS_LOGS: LogStep[] = [
   { id: '1', message: 'Initializing Secure Enclave...', duration: 800 },
   { id: '2', message: 'Connecting to Banking Gateway...', duration: 1200 },
@@ -25,6 +27,15 @@ const DATA_LOGS: LogStep[] = [
   { id: '5', message: 'Stream Processing Active.', duration: 300 },
 ];
 
+const DOCKER_LOGS_TEMPLATE: LogStep[] = [
+  { id: 'd1', message: 'Step 1/5 : FROM node:18-alpine', duration: 400 },
+  { id: 'd2', message: 'Step 2/5 : WORKDIR /app', duration: 200 },
+  { id: 'd3', message: 'Step 3/5 : COPY package*.json ./', duration: 300 },
+  { id: 'd4', message: 'Step 4/5 : RUN npm ci --only=production', duration: 1500 },
+  { id: 'd5', message: 'Step 5/5 : COPY . .', duration: 300 },
+  { id: 'd6', message: 'Successfully built image sha256:a1b2c3d4', duration: 600 },
+];
+
 export const MOCK_API_DATA = [
   { id: 101, endpoint: '/v1/payments/authorize', method: 'POST', status: 200, latency: '24ms' },
   { id: 102, endpoint: '/v1/payments/capture', method: 'POST', status: 202, latency: '45ms' },
@@ -40,6 +51,16 @@ export const SIMULATION_PROFILES: SimulationProfile[] = [
     description: 'High-security transaction processor (PCI-DSS compliant).',
     icon: 'server',
     startupSequence: PAYMENTS_LOGS,
+    dockerBuildSequence: DOCKER_LOGS_TEMPLATE,
+    costComparison: {
+      hourlyRateOnDemand: 0.48, // e.g. n1-standard-4
+      hourlyRateSpot: 0.04,     // Spot price
+      monthlyData: [
+        { month: 'Jan', onDemandCost: 350, spotLazarusCost: 45 },
+        { month: 'Feb', onDemandCost: 340, spotLazarusCost: 42 },
+        { month: 'Mar', onDemandCost: 360, spotLazarusCost: 48 },
+      ]
+    },
     metrics: { label: 'Throughput', unit: 'tx/s', mockValues: [45, 120, 80, 200, 150] }
   },
   {
@@ -48,6 +69,16 @@ export const SIMULATION_PROFILES: SimulationProfile[] = [
     description: 'LLM hosting environment with GPU acceleration.',
     icon: 'cpu',
     startupSequence: AI_LOGS,
+    dockerBuildSequence: DOCKER_LOGS_TEMPLATE,
+    costComparison: {
+      hourlyRateOnDemand: 1.20,
+      hourlyRateSpot: 0.28,
+      monthlyData: [
+        { month: 'Jan', onDemandCost: 850, spotLazarusCost: 180 },
+        { month: 'Feb', onDemandCost: 920, spotLazarusCost: 210 },
+        { month: 'Mar', onDemandCost: 880, spotLazarusCost: 195 },
+      ]
+    },
     metrics: { label: 'Tokens', unit: 'tok/s', mockValues: [12, 45, 30, 60, 55] }
   },
   {
@@ -56,6 +87,16 @@ export const SIMULATION_PROFILES: SimulationProfile[] = [
     description: 'Stream processing for user events.',
     icon: 'database',
     startupSequence: DATA_LOGS,
+    dockerBuildSequence: DOCKER_LOGS_TEMPLATE,
+    costComparison: {
+      hourlyRateOnDemand: 0.65,
+      hourlyRateSpot: 0.12,
+      monthlyData: [
+        { month: 'Jan', onDemandCost: 480, spotLazarusCost: 90 },
+        { month: 'Feb', onDemandCost: 510, spotLazarusCost: 95 },
+        { month: 'Mar', onDemandCost: 490, spotLazarusCost: 92 },
+      ]
+    },
     metrics: { label: 'Events', unit: 'msg/s', mockValues: [500, 2400, 1800, 3000, 2100] }
   }
 ];
