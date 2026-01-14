@@ -1,23 +1,21 @@
-export enum AppState {
-  OFFLINE = 'OFFLINE',
-  STARTING = 'STARTING',
-  READY = 'READY',
-  ACTIVE = 'ACTIVE',
-  SLEEPING = 'SLEEPING', // The transition state back to offline
-  DEPLOYING = 'DEPLOYING'
-}
+export type EnvironmentState = 'OFFLINE' | 'STARTING' | 'READY' | 'ACTIVE' | 'SLEEPING';
 
 export interface LogStep {
   id: string;
   message: string;
-  status: 'pending' | 'running' | 'completed' | 'fallback';
-  timestamp?: string;
-  icon?: string;
+  duration: number;
 }
 
-export interface CostTier {
+export interface SimulationProfile {
+  id: string;
   name: string;
-  cost: number;
-  type: 'idle' | 'spot' | 'demand';
   description: string;
+  icon: 'server' | 'cpu' | 'database'; // Maps to Lucide icons
+  startupSequence: LogStep[];
+  metrics: {
+    label: string;
+    unit: string;
+    mockValues: number[]; // For the graph visualization
+  };
 }
+
