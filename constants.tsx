@@ -1,29 +1,28 @@
-import { LogStep, CostTier } from './types';
-import { Server, Search, Coins, Cpu, HardDrive, PlayCircle, TestTube, CheckCircle } from 'lucide-react';
-
-export const STARTUP_SEQUENCE: Omit<LogStep, 'status'>[] = [
-  { id: '1', message: 'Request received', icon: 'Server' },
-  { id: '2', message: 'Checking environment status', icon: 'Search' },
-  { id: '3', message: 'Attempting Spot capacity allocation', icon: 'Coins' },
-  { id: '4', message: 'Waiting for compute resources', icon: 'Cpu' },
-  { id: '5', message: 'Attaching persistent disk', icon: 'HardDrive' },
-  { id: '6', message: 'Booting services', icon: 'PlayCircle' },
-  { id: '7', message: 'Running health checks', icon: 'TestTube' },
+import { SimulationProfile, LogStep } from './types';
+const PAYMENTS_LOGS: LogStep[] = [
+  { id: '1', message: 'Initializing Secure Enclave...', duration: 800 },
+  { id: '2', message: 'Connecting to Banking Gateway...', duration: 1200 },
+  { id: '3', message: 'Verifying TLS Certificates...', duration: 600 },
+  { id: '4', message: 'Loading Fraud Detection Modules...', duration: 1000 },
+  { id: '5', message: 'Ready for Transactions.', duration: 500 },
 ];
 
-export const DEPLOYMENT_SEQUENCE: Omit<LogStep, 'status'>[] = [
-  { id: 'd1', message: 'Pushing code to GitHub', icon: 'UploadCloud' },
-  { id: 'd2', message: 'Cloud Build triggered', icon: 'Zap' },
-  { id: 'd3', message: 'Building Docker image', icon: 'Box' },
-  { id: 'd4', message: 'Pushing to Artifact Registry', icon: 'Layers' },
-  { id: 'd5', message: 'Deploying Cloud Run service', icon: 'Server' },
-  { id: 'd6', message: 'Gateway service started', icon: 'PlayCircle' },
+// 2. AI Inference Logs
+const AI_LOGS: LogStep[] = [
+  { id: '1', message: 'Allocating GPU VRAM (A100)...', duration: 1500 },
+  { id: '2', message: 'Loading PyTorch Weights (4GB)...', duration: 2000 },
+  { id: '3', message: 'Warming up Tensor Cores...', duration: 800 },
+  { id: '4', message: 'Model Quantization Check...', duration: 600 },
+  { id: '5', message: 'Inference Server Online.', duration: 400 },
 ];
 
-export const COST_DATA: CostTier[] = [
-  { name: 'Idle (Storage)', cost: 0.04, type: 'idle', description: 'Environment sleeping' },
-  { name: 'Active (Spot)', cost: 0.14, type: 'spot', description: 'Current Mode' },
-  { name: 'Active (On-Demand)', cost: 0.48, type: 'demand', description: 'Fallback Mode' },
+// 3. Data Pipeline Logs
+const DATA_LOGS: LogStep[] = [
+  { id: '1', message: 'Connecting to Kafka Brokers...', duration: 900 },
+  { id: '2', message: 'Hydrating Redis Cache...', duration: 1400 },
+  { id: '3', message: 'Syncing Schema Registry...', duration: 700 },
+  { id: '4', message: 'Starting Worker Pool (x4)...', duration: 1100 },
+  { id: '5', message: 'Stream Processing Active.', duration: 300 },
 ];
 
 export const MOCK_API_DATA = [
@@ -32,4 +31,31 @@ export const MOCK_API_DATA = [
   { id: 103, endpoint: '/v1/customers/kyc', method: 'GET', status: 200, latency: '120ms' },
   { id: 104, endpoint: '/v1/transactions/list', method: 'GET', status: 200, latency: '15ms' },
   { id: 105, endpoint: '/v1/webhooks/stripe', method: 'POST', status: 400, latency: '8ms' },
+];
+
+export const SIMULATION_PROFILES: SimulationProfile[] = [
+  {
+    id: 'payments-v1',
+    name: 'Payments Gateway',
+    description: 'High-security transaction processor (PCI-DSS compliant).',
+    icon: 'server',
+    startupSequence: PAYMENTS_LOGS,
+    metrics: { label: 'Throughput', unit: 'tx/s', mockValues: [45, 120, 80, 200, 150] }
+  },
+  {
+    id: 'ai-model-v2',
+    name: 'GenAI Inference',
+    description: 'LLM hosting environment with GPU acceleration.',
+    icon: 'cpu',
+    startupSequence: AI_LOGS,
+    metrics: { label: 'Tokens', unit: 'tok/s', mockValues: [12, 45, 30, 60, 55] }
+  },
+  {
+    id: 'data-pipe-v1',
+    name: 'Real-time Analytics',
+    description: 'Stream processing for user events.',
+    icon: 'database',
+    startupSequence: DATA_LOGS,
+    metrics: { label: 'Events', unit: 'msg/s', mockValues: [500, 2400, 1800, 3000, 2100] }
+  }
 ];
