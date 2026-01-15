@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { SimulationProfile } from '../types';
 import { MOCK_API_DATA } from '../constants'; // Keeping this for the table for now, or could mock it too
-import { Power, Clock, Link, Activity, Search, Bell } from 'lucide-react';
+import { Power, Clock, Link, Activity, Search, Bell, Zap, Terminal } from 'lucide-react';
 
 interface ActiveSessionProps {
   onStop: () => void;
+  onCrash: () => void;
+  onConnect: () => void;
   profile: SimulationProfile;
 }
 
-const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, profile }) => {
+const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, onCrash, onConnect, profile }) => {
   const [idleTime, setIdleTime] = useState(0);
 
   useEffect(() => {
@@ -68,7 +70,23 @@ const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, profile }) => {
               <span className="font-mono text-zinc-400">https://{profile.id}.internal.cloud</span>
             </p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-3">
+            <button
+              onClick={onCrash}
+              className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors text-sm font-medium"
+              title="Trigger a Spot Preemption event"
+            >
+              <Zap size={16} />
+              <span className="hidden sm:inline">Simulate Crash</span>
+            </button>
+            <button
+              onClick={onConnect}
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-lg hover:bg-zinc-700 hover:text-white transition-colors text-sm font-medium"
+            >
+              <Terminal size={16} />
+              <span className="hidden sm:inline">Connect</span>
+            </button>
+            <div className="w-px h-10 bg-zinc-800 mx-2"></div>
             <button className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition"><Search className="w-5 h-5" /></button>
             <button className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition"><Bell className="w-5 h-5" /></button>
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600" />

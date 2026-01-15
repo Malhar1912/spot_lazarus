@@ -7,11 +7,15 @@ import ActiveSession from './components/ActiveSession';
 import DockerBuildSim from './components/DockerBuildSim';
 import VMVisualizer from './components/VMVisualizer';
 import CostAnalytics from './components/CostAnalytics';
+import RealTimeAnalytics from './components/RealTimeAnalytics';
+import TopologyMap from './components/TopologyMap';
+import TerminalWindow from './components/TerminalWindow';
 
 function App() {
   const [selectedProfile, setSelectedProfile] = useState<SimulationProfile>(SIMULATION_PROFILES[0]);
   const [appState, setAppState] = useState<EnvironmentState>('OFFLINE');
   const [stage, setStage] = useState<'SELECTION' | 'DOCKER_BUILD' | 'BOOT_LOGS' | 'ACTIVE'>('SELECTION');
+  const [showTerminal, setShowTerminal] = useState(false);
 
   const handleStart = () => {
     setAppState('DEPLOYING');
@@ -31,6 +35,15 @@ function App() {
   const handleStop = () => {
     setAppState('OFFLINE');
     setStage('SELECTION');
+  };
+
+  const handleSimulateCrash = () => {
+    setAppState('RECOVERING');
+
+    // Simulate recovery delay
+    setTimeout(() => {
+      setAppState('ACTIVE');
+    }, 4000);
   };
 
   return (
@@ -128,21 +141,26 @@ function App() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column: Visuals & Metrics */}
             <div className="space-y-8">
+              <TopologyMap state={appState} />
               <VMVisualizer state={appState} />
               <ActiveSession
                 profile={selectedProfile}
                 onStop={handleStop}
+                onCrash={handleSimulateCrash}
+                onConnect={() => setShowTerminal(true)}
               />
             </div>
 
             {/* Right Column: Analytics */}
             <div className="space-y-8">
+              <RealTimeAnalytics />
               <CostAnalytics data={selectedProfile.costComparison.monthlyData} />
             </div>
           </div>
         </div>
       )}
 
+      {showTerminal && <TerminalWindow onClose={() => setShowTerminal(false)} />}
     </div>
   );
 }
