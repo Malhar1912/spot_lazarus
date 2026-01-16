@@ -9,21 +9,25 @@ interface MetricPoint {
     network: number;
 }
 
-const generateDataPoint = (lastPoint?: MetricPoint): MetricPoint => {
+const generateDataPoint = (lastPoint?: MetricPoint, isCpuChaos: boolean = false): MetricPoint => {
     const now = new Date();
     const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     if (!lastPoint) {
         return {
             time: timeStr,
-            cpu: 45,
+            cpu: isCpuChaos ? 98 : 45,
             memory: 60,
             network: 20
         };
     }
 
     // Add some random fluctuation but keep it somewhat realistic (clamped 0-100)
-    const nextCpu = Math.min(100, Math.max(0, lastPoint.cpu + (Math.random() - 0.5) * 15));
+    let nextCpu = Math.min(100, Math.max(0, lastPoint.cpu + (Math.random() - 0.5) * 15));
+    if (isCpuChaos) {
+        nextCpu = 95 + Math.random() * 5; // Pin between 95-100%
+    }
+
     const nextMem = Math.min(100, Math.max(0, lastPoint.memory + (Math.random() - 0.5) * 5)); // Memory is more stable
     const nextNet = Math.min(100, Math.max(0, lastPoint.network + (Math.random() - 0.5) * 20));
 
@@ -35,14 +39,14 @@ const generateDataPoint = (lastPoint?: MetricPoint): MetricPoint => {
     };
 };
 
-export default function RealTimeAnalytics() {
+export default function RealTimeAnalytics({ isCpuChaos }: { isCpuChaos?: boolean }) {
     const [data, setData] = useState<MetricPoint[]>([]);
     const [currentMetrics, setCurrentMetrics] = useState<MetricPoint>({ time: '', cpu: 0, memory: 0, network: 0 });
 
     useEffect(() => {
         // Initial seed data
         const initialData = Array(20).fill(null).map((_, i) => ({
-            ...generateDataPoint(),
+            ...generateDataPoint(undefined, isCpuChaos),
             time: new Date(Date.now() - (20 - i) * 1000).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
         }));
         setData(initialData);
@@ -50,7 +54,7 @@ export default function RealTimeAnalytics() {
 
         const interval = setInterval(() => {
             setData(prev => {
-                const newPoint = generateDataPoint(prev[prev.length - 1]);
+                const newPoint = generateDataPoint(prev[prev.length - 1], isCpuChaos);
                 setCurrentMetrics(newPoint);
                 const newData = [...prev, newPoint];
                 if (newData.length > 30) newData.shift(); // Keep last 30 points
@@ -59,7 +63,7 @@ export default function RealTimeAnalytics() {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [isCpuChaos]);
 
     return (
         <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 shadow-xl">
@@ -136,6 +140,7 @@ export default function RealTimeAnalytics() {
                         <Tooltip
                             contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', color: '#fff' }}
                             itemStyle={{ fontSize: 13 }}
+                            formatter={(value: number) => value.toFixed(1)}
                         />
                         <Area
                             type="monotone"
@@ -171,9 +176,9 @@ function MetricCard({ label, value, unit, icon: Icon, color, bg, border }: any) 
                 <span className="text-zinc-400 text-xs font-semibold uppercase tracking-wider">{label}</span>
                 <Icon size={16} className={color} />
             </div>
-            <div className="flex items-baseline gap-1">
+            <div className="flex items-baseline gap-1 flex-wrap">
                 <span className={`text-2xl font-bold ${color}`}>{value.toFixed(1)}</span>
-                <span className="text-zinc-500 text-sm">{unit}</span>
+                <span className="text-zinc-500 text-sm whitespace-nowrap">{unit}</span>
             </div>
         </div>
     );

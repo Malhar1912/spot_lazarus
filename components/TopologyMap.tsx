@@ -3,7 +3,7 @@ import { EnvironmentState } from '../types';
 import { Cloud, Globe, Server, Database, ShieldCheck, Zap, Info, X } from 'lucide-react';
 import { useState } from 'react';
 
-export default function TopologyMap({ state }: { state: EnvironmentState }) {
+export default function TopologyMap({ state, isDbChaos, isNetworkChaos }: { state: EnvironmentState, isDbChaos?: boolean, isNetworkChaos?: boolean }) {
     const isRecovering = state === 'RECOVERING';
     const isActive = state === 'ACTIVE';
     const isRunning = isActive || isRecovering;
@@ -15,8 +15,8 @@ export default function TopologyMap({ state }: { state: EnvironmentState }) {
         'LB': {
             title: 'Load Balancer (L7)',
             stats: [
-                { label: 'Active Conn', value: '14,203' },
-                { label: 'Requests/sec', value: '2,400' },
+                { label: 'Active Conn', value: isNetworkChaos ? '0' : '14,203' },
+                { label: 'Requests/sec', value: isNetworkChaos ? '0' : '2,400' },
                 { label: 'Zone', value: 'us-east-1a' }
             ]
         },
@@ -31,9 +31,9 @@ export default function TopologyMap({ state }: { state: EnvironmentState }) {
         'DB': {
             title: 'Primary Database',
             stats: [
-                { label: 'Connections', value: '42' },
-                { label: 'IOPS', value: '1,200' },
-                { label: 'Status', value: 'Healthy' }
+                { label: 'Connections', value: isDbChaos ? '0' : '42' },
+                { label: 'IOPS', value: isDbChaos ? '0' : '1,200' },
+                { label: 'Status', value: isDbChaos ? 'Unreachable' : 'Healthy' }
             ]
         }
     };
@@ -89,9 +89,14 @@ export default function TopologyMap({ state }: { state: EnvironmentState }) {
                         NODES UNHEALTHY
                     </span>
                 )}
-                {isActive && (
+                {isActive && !isNetworkChaos && !isDbChaos && (
                     <span className="text-xs bg-green-500/20 text-green-500 px-2 py-0.5 rounded font-mono">
                         HEALTHY
+                    </span>
+                )}
+                {(isNetworkChaos || isDbChaos) && (
+                    <span className="text-xs bg-red-500/20 text-red-500 px-2 py-0.5 rounded font-mono flex items-center gap-1 animate-pulse">
+                        <Zap size={10} /> CRITICAL
                     </span>
                 )}
                 <span className="text-[10px] text-zinc-600 ml-2 italic">Click nodes for details</span>
@@ -107,24 +112,24 @@ export default function TopologyMap({ state }: { state: EnvironmentState }) {
                 </defs>
 
                 {/* 1. User to LB */}
-                <path id="path1" d="M150,200 L300,200" stroke="#333" strokeWidth="2" strokeDasharray="5,5" />
-                {isRunning && !isRecovering && (
+                <path id="path1" d="M150,200 L300,200" stroke={isNetworkChaos ? "#ef4444" : "#333"} strokeWidth="2" strokeDasharray={isNetworkChaos ? "5,5" : "5,5"} />
+                {isRunning && !isRecovering && !isNetworkChaos && (
                     <motion.circle r="3" fill="#60a5fa">
                         <animateMotion href="#path1" dur="1.5s" repeatCount="indefinite" />
                     </motion.circle>
                 )}
 
                 {/* 2. LB to Instance */}
-                <path id="path2" d="M300,200 L500,200" stroke="#333" strokeWidth="2" />
-                {isRunning && !isRecovering && (
+                <path id="path2" d="M300,200 L500,200" stroke={isNetworkChaos ? "#ef4444" : "#333"} strokeWidth="2" />
+                {isRunning && !isRecovering && !isNetworkChaos && (
                     <motion.circle r="3" fill="#8b5cf6">
                         <animateMotion href="#path2" dur="1.5s" begin="0.5s" repeatCount="indefinite" />
                     </motion.circle>
                 )}
 
                 {/* 3. Instance to DB */}
-                <path id="path3" d="M500,200 L650,200" stroke="#333" strokeWidth="2" />
-                {isRunning && !isRecovering && (
+                <path id="path3" d="M500,200 L650,200" stroke={isDbChaos ? "#ef4444" : "#333"} strokeDasharray={isDbChaos ? "5,5" : ""} strokeWidth="2" />
+                {isRunning && !isRecovering && !isDbChaos && (
                     <motion.circle r="3" fill="#10b981">
                         <animateMotion href="#path3" dur="1s" begin="1s" repeatCount="indefinite" />
                     </motion.circle>
@@ -150,7 +155,7 @@ export default function TopologyMap({ state }: { state: EnvironmentState }) {
                     <div className={`w-16 h-16 rounded-lg bg-blue-900/20 border-2 ${selectedNode === 'LB' ? 'border-blue-400 ring-2 ring-blue-500/20' : 'border-blue-500/50'} flex items-center justify-center text-blue-400 hover:scale-105 transition-all`}>
                         <ShieldCheck size={28} />
                     </div>
-                    <span className="text-xs text-blue-400 font-mono group-hover:underline">LB-REGION-1</span>
+                    <span className="text-xs text-blue-400 font-mono group-hover:underline text-center whitespace-nowrap">LB-REGION-1</span>
                 </div>
 
                 {/* SPOT INSTANCE NODE (THE TARGET) */}
@@ -195,7 +200,7 @@ export default function TopologyMap({ state }: { state: EnvironmentState }) {
                     <div className={`w-16 h-16 rounded-full bg-emerald-900/20 border-2 ${selectedNode === 'DB' ? 'border-emerald-400 ring-2 ring-emerald-500/20' : 'border-emerald-500/50'} flex items-center justify-center text-emerald-400 hover:scale-105 transition-all`}>
                         <Database size={24} />
                     </div>
-                    <span className="text-xs text-emerald-400 font-mono group-hover:underline">PRIMARY-DB</span>
+                    <span className="text-xs text-emerald-400 font-mono group-hover:underline text-center whitespace-nowrap">PRIMARY-DB</span>
                 </div>
 
             </div>

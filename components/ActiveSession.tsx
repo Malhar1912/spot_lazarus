@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { SimulationProfile, EnvironmentState } from '../types';
 import { Power, Clock, Link, Zap, Terminal, TrendingUp } from 'lucide-react';
 import LiveTrafficTable from './LiveTrafficTable';
-import SystemEventFeed from './SystemEventFeed';
 import InstanceDetails from './InstanceDetails';
-import TopologyMap from './TopologyMap';
+import GlobalMesh from './GlobalMesh';
 import RealTimeAnalytics from './RealTimeAnalytics';
+import NeuralTerminal from './NeuralTerminal';
+
+import ChaosControl, { ChaosState } from './ChaosControl';
 
 interface ActiveSessionProps {
   onStop: () => void;
@@ -18,6 +20,11 @@ interface ActiveSessionProps {
 const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, onCrash, onConnect, profile, appState }) => {
   const [uptime, setUptime] = useState(0);
   const [savings, setSavings] = useState(0);
+  const [chaosState, setChaosState] = useState<ChaosState>({
+    cpuSpike: false,
+    networkLoss: false,
+    dbOutage: false
+  });
 
   // Constants for savings calc
   const hourlySavings = profile.costComparison.hourlyRateOnDemand - profile.costComparison.hourlyRateSpot;
@@ -30,6 +37,10 @@ const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, onCrash, onConnec
     }, 100);
     return () => clearInterval(interval);
   }, [savingsPerSecond]);
+
+  const toggleChaos = (key: keyof ChaosState) => {
+    setChaosState(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
 
   return (
@@ -96,6 +107,9 @@ const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, onCrash, onConnec
 
         {/* LEFT COLUMN: Infrastructure (3/12) */}
         <div className="col-span-1 md:col-span-12 xl:col-span-3 flex flex-col gap-5">
+          {/* Chaos Control Panel (NEW) */}
+          <ChaosControl chaosState={chaosState} onToggle={toggleChaos} />
+
           {/* Instance Details */}
           <InstanceDetails profileName={profile.name} profileId={profile.id} />
         </div>
@@ -104,7 +118,11 @@ const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, onCrash, onConnec
         <div className="col-span-1 md:col-span-12 xl:col-span-6 flex flex-col gap-6">
           {/* Topology Map - Taller */}
           <div className="h-[500px] w-full">
-            <TopologyMap state={appState} />
+            <GlobalMesh
+              state={appState}
+              isDbChaos={chaosState.dbOutage}
+              isNetworkChaos={chaosState.networkLoss}
+            />
           </div>
 
           {/* Traffic Table */}
@@ -116,11 +134,11 @@ const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, onCrash, onConnec
         {/* RIGHT COLUMN: Observability (3/12) */}
         <div className="col-span-1 md:col-span-12 xl:col-span-3 flex flex-col gap-5">
           {/* Real Time Analytics - More prominent now */}
-          <RealTimeAnalytics />
+          <RealTimeAnalytics isCpuChaos={chaosState.cpuSpike} />
 
           {/* Event Feed - Fixed height for scrollbar visibility */}
           <div className="h-[500px]">
-            <SystemEventFeed />
+            <NeuralTerminal />
           </div>
         </div>
 
