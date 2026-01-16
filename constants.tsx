@@ -62,41 +62,5 @@ export const SIMULATION_PROFILES: SimulationProfile[] = [
       ]
     },
     metrics: { label: 'Throughput', unit: 'tx/s', mockValues: [45, 120, 80, 200, 150] }
-  },
-  {
-    id: 'ai-model-v2',
-    name: 'GenAI Inference',
-    description: 'LLM hosting environment with GPU acceleration.',
-    icon: 'cpu',
-    startupSequence: AI_LOGS,
-    dockerBuildSequence: DOCKER_LOGS_TEMPLATE,
-    costComparison: {
-      hourlyRateOnDemand: 1.20,
-      hourlyRateSpot: 0.28,
-      monthlyData: [
-        { month: 'Jan', onDemandCost: 850, spotLazarusCost: 180 },
-        { month: 'Feb', onDemandCost: 920, spotLazarusCost: 210 },
-        { month: 'Mar', onDemandCost: 880, spotLazarusCost: 195 },
-      ]
-    },
-    metrics: { label: 'Tokens', unit: 'tok/s', mockValues: [12, 45, 30, 60, 55] }
-  },
-  {
-    id: 'data-pipe-v1',
-    name: 'Real-time Analytics',
-    description: 'Stream processing for user events.',
-    icon: 'database',
-    startupSequence: DATA_LOGS,
-    dockerBuildSequence: DOCKER_LOGS_TEMPLATE,
-    costComparison: {
-      hourlyRateOnDemand: 0.65,
-      hourlyRateSpot: 0.12,
-      monthlyData: [
-        { month: 'Jan', onDemandCost: 480, spotLazarusCost: 90 },
-        { month: 'Feb', onDemandCost: 510, spotLazarusCost: 95 },
-        { month: 'Mar', onDemandCost: 490, spotLazarusCost: 92 },
-      ]
-    },
-    metrics: { label: 'Events', unit: 'msg/s', mockValues: [500, 2400, 1800, 3000, 2100] }
   }
 ];
