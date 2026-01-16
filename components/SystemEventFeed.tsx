@@ -99,32 +99,37 @@ export default function SystemEventFeed() {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-zinc-900">
+            <div
+                className="flex-1 overflow-y-auto p-3 space-y-2"
+                style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#3f3f46 #18181b'
+                }}
+            >
                 {filteredEvents.map((evt) => (
                     <div
                         key={evt.id}
                         onClick={() => setSelectedEvent(evt)}
-                        className="flex gap-3 items-start animate-in slide-in-from-left-2 fade-in duration-300 cursor-pointer group hover:bg-zinc-800/30 p-1.5 rounded-lg -mx-1.5 transition-colors"
+                        className="flex gap-2 items-center cursor-pointer group hover:bg-zinc-800/40 py-2 px-2 rounded-lg transition-colors border-b border-zinc-800/50 last:border-b-0"
                     >
                         <div className={`
-                            mt-0.5 min-w-[24px] h-6 rounded flex items-center justify-center
+                            w-5 h-5 rounded flex items-center justify-center flex-shrink-0
                             ${evt.type === 'INFO' ? 'bg-zinc-800 text-zinc-400' :
                                 evt.type === 'SUCCESS' ? 'bg-emerald-900/30 text-emerald-400' :
                                     evt.type === 'WARNING' ? 'bg-amber-900/30 text-amber-400' :
                                         'bg-blue-900/30 text-blue-400'}
                         `}>
-                            <evt.icon size={14} />
+                            <evt.icon size={12} />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm text-zinc-300 leading-tight group-hover:text-white transition-colors">{evt.message}</p>
-                            <span className="text-[10px] text-zinc-600 font-mono mt-0.5 block">{evt.timestamp}</span>
+                            <p className="text-xs text-zinc-400 leading-snug truncate group-hover:text-zinc-200 transition-colors">{evt.message}</p>
                         </div>
-                        <ChevronRight size={14} className="text-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity self-center" />
+                        <span className="text-[9px] text-zinc-600 font-mono flex-shrink-0">{evt.timestamp}</span>
                     </div>
                 ))}
                 {filteredEvents.length === 0 && (
-                    <div className="text-center text-zinc-600 text-xs py-8">
-                        No events found for filter "{filter}"
+                    <div className="text-center text-zinc-600 text-xs py-6">
+                        No events for "{filter}"
                     </div>
                 )}
             </div>
