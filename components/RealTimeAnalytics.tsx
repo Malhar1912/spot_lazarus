@@ -13,30 +13,20 @@ const generateDataPoint = (lastPoint?: MetricPoint, isCpuChaos: boolean = false)
     const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     if (!lastPoint) {
-<<<<<<< HEAD
         return {
             time: timeStr,
             cpu: isCpuChaos ? 98 : 45,
-            memory: 60,
-            network: 20
+            memory: 60
         };
     }
 
-    // Add some random fluctuation but keep it somewhat realistic (clamped 0-100)
+    // Chaos Logic: Pin CPU if chaos mode
     let nextCpu = Math.min(100, Math.max(0, lastPoint.cpu + (Math.random() - 0.5) * 15));
     if (isCpuChaos) {
-        nextCpu = 95 + Math.random() * 5; // Pin between 95-100%
+        nextCpu = 95 + Math.random() * 5;
     }
 
-    const nextMem = Math.min(100, Math.max(0, lastPoint.memory + (Math.random() - 0.5) * 5)); // Memory is more stable
-    const nextNet = Math.min(100, Math.max(0, lastPoint.network + (Math.random() - 0.5) * 20));
-=======
-        return { time: timeStr, cpu: 45, memory: 60 };
-    }
-
-    const nextCpu = Math.min(100, Math.max(0, lastPoint.cpu + (Math.random() - 0.5) * 15));
     const nextMem = Math.min(100, Math.max(0, lastPoint.memory + (Math.random() - 0.5) * 5));
->>>>>>> 84009beaf5ed01c12808009e0d3225ca919a3d46
 
     return { time: timeStr, cpu: nextCpu, memory: nextMem };
 };
@@ -132,18 +122,13 @@ export default function RealTimeAnalytics({ isCpuChaos }: { isCpuChaos?: boolean
                             tickLine={false}
                         />
                         <Tooltip
-<<<<<<< HEAD
-                            contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', color: '#fff' }}
-                            itemStyle={{ fontSize: 13 }}
-                            formatter={(value: number) => value.toFixed(1)}
-=======
                             contentStyle={{
                                 backgroundColor: '#18181b',
                                 borderColor: '#3f3f46',
                                 borderRadius: '8px',
                                 fontSize: '13px'
                             }}
->>>>>>> 84009beaf5ed01c12808009e0d3225ca919a3d46
+                            formatter={(value: number) => value.toFixed(1)}
                         />
                         <Area
                             type="monotone"
@@ -178,18 +163,12 @@ function MetricCard({ label, value, unit, icon: Icon, color, bg, border }: any) 
             <div className={`w-12 h-12 rounded-lg ${bg} flex items-center justify-center`}>
                 <Icon size={24} className={color} />
             </div>
-<<<<<<< HEAD
-            <div className="flex items-baseline gap-1 flex-wrap">
-                <span className={`text-2xl font-bold ${color}`}>{value.toFixed(1)}</span>
-                <span className="text-zinc-500 text-sm whitespace-nowrap">{unit}</span>
-=======
             <div>
                 <span className="text-zinc-400 text-sm block mb-1">{label}</span>
                 <div className="flex items-baseline gap-1">
                     <span className={`text-2xl font-bold ${color}`}>{value.toFixed(1)}</span>
                     <span className="text-zinc-500 text-sm">{unit}</span>
                 </div>
->>>>>>> 84009beaf5ed01c12808009e0d3225ca919a3d46
             </div>
         </div>
     );

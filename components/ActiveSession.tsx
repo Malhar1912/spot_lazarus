@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { SimulationProfile, EnvironmentState } from '../types';
 import { Power, Clock, Link, Zap, Terminal, TrendingUp } from 'lucide-react';
 import LiveTrafficTable from './LiveTrafficTable';
-import InstanceDetails from './InstanceDetails';
 import GlobalMesh from './GlobalMesh';
 import RealTimeAnalytics from './RealTimeAnalytics';
 import NeuralTerminal from './NeuralTerminal';
+import CostForecaster from './CostForecaster';
+import AutoScaler, { AutoScaleConfig } from './AutoScaler';
+import InstanceGroup from './InstanceGroup';
 
 import ChaosControl, { ChaosState } from './ChaosControl';
 
@@ -38,14 +40,41 @@ const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, onCrash, onConnec
     return () => clearInterval(interval);
   }, [savingsPerSecond]);
 
-<<<<<<< HEAD
+  // Auto Scaling State
+  const [instanceCount, setInstanceCount] = useState(3);
+  const [cpuLoad, setCpuLoad] = useState(45);
+  const [autoScaleConfig, setAutoScaleConfig] = useState<AutoScaleConfig>({
+    targetCpu: 60,
+    minInstances: 2,
+    maxInstances: 12,
+    coolDown: 30
+  });
+
   const toggleChaos = (key: keyof ChaosState) => {
     setChaosState(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Simulate Load & Scaling Logic
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // 1. Simulate CPU Load based on Chaos State
+      setCpuLoad(prev => {
+        let target = chaosState.cpuSpike ? 98 : 45;
+        // Add some noise
+        const noise = (Math.random() - 0.5) * 10;
+        return Math.min(100, Math.max(0, target + noise));
+      });
 
-=======
->>>>>>> 84009beaf5ed01c12808009e0d3225ca919a3d46
+      // 2. Auto Scaling Logic (Simplified)
+      if (cpuLoad > autoScaleConfig.targetCpu) {
+        setInstanceCount(prev => Math.min(prev + 1, autoScaleConfig.maxInstances));
+      } else if (cpuLoad < (autoScaleConfig.targetCpu - 20)) {
+        setInstanceCount(prev => Math.max(prev - 1, autoScaleConfig.minInstances));
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [chaosState.cpuSpike, cpuLoad, autoScaleConfig]);
+
   return (
     <div className="flex flex-col min-h-screen bg-black">
       {/* HEADER - Simplified with better touch targets (min 44px) */}
@@ -119,13 +148,17 @@ const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, onCrash, onConnec
           {/* PRIMARY COLUMN (8/12) - Main visual focus */}
           <div className="lg:col-span-8 flex flex-col gap-6">
 
-            {/* Topology Map - Hero element, most important visual */}
+            {/* Global Mesh - Hero element */}
             <section>
               <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">
-                Network Topology
+                Global Infrastructure
               </h2>
-              <div className="h-[380px]">
-                <TopologyMap state={appState} />
+              <div className="h-[450px]">
+                <GlobalMesh
+                  state={appState}
+                  isDbChaos={chaosState.dbOutage}
+                  isNetworkChaos={chaosState.networkLoss}
+                />
               </div>
             </section>
 
@@ -143,108 +176,49 @@ const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, onCrash, onConnec
           {/* SECONDARY COLUMN (4/12) - Supporting information */}
           <div className="lg:col-span-4 flex flex-col gap-6">
 
-            {/* Instance Details */}
+            {/* Auto Scaler (New Control) */}
+            <AutoScaler
+              config={autoScaleConfig}
+              currentCpu={cpuLoad}
+              instanceCount={instanceCount}
+              onChange={setAutoScaleConfig}
+            />
+
+            {/* Instance Group (Visualizer) */}
             <section>
-              <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">
-                Instance Info
-              </h2>
-              <InstanceDetails profileName={profile.name} profileId={profile.id} />
+              <InstanceGroup
+                instanceCount={instanceCount}
+                maxInstances={autoScaleConfig.maxInstances}
+                onAdd={() => setInstanceCount(prev => Math.min(prev + 1, autoScaleConfig.maxInstances))}
+                onRemove={() => setInstanceCount(prev => Math.max(prev - 1, autoScaleConfig.minInstances))}
+              />
             </section>
 
-            {/* System Events */}
+            {/* Chaos Control Panel */}
+            <ChaosControl chaosState={chaosState} onToggle={toggleChaos} />
+
+            {/* Neural Terminal (Activity Log) */}
             <section>
               <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">
-                Activity Log
+                System Neural Feed
               </h2>
-              <div className="h-[400px]">
-                <SystemEventFeed />
+              <div className="h-[250px]">
+                <NeuralTerminal />
               </div>
             </section>
           </div>
         </div>
 
-<<<<<<< HEAD
-        {/* Right: Actions */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 rounded-lg border border-zinc-800">
-            <TrendingUp size={14} className="text-green-400" />
-            <span className="text-xs text-zinc-400">Total Savings:</span>
-            <span className="text-sm font-bold text-white font-mono">${savings.toFixed(4)}</span>
-          </div>
-
-          <button
-            onClick={onCrash}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors text-sm font-medium"
-            title="Trigger a Spot Preemption event"
-          >
-            <Zap size={16} />
-            <span className="hidden sm:inline">Simulate Crash</span>
-          </button>
-          <button
-            onClick={onConnect}
-            className="flex items-center gap-2 px-4 py-2 bg-white text-black border border-zinc-200 rounded-lg hover:bg-zinc-200 transition-colors text-sm font-bold"
-          >
-            <Terminal size={16} />
-            Connect
-          </button>
-          <button
-            onClick={onStop}
-            className="flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-white transition-colors"
-          >
-            <Power className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* 2. MAIN DASHBOARD CONTENT */}
-      <main className="flex-1 p-6 grid grid-cols-1 md:grid-cols-12 gap-6 pb-20">
-
-        {/* LEFT COLUMN: Infrastructure (3/12) */}
-        <div className="col-span-1 md:col-span-12 xl:col-span-3 flex flex-col gap-5">
-          {/* Chaos Control Panel (NEW) */}
-          <ChaosControl chaosState={chaosState} onToggle={toggleChaos} />
-
-          {/* Instance Details */}
-          <InstanceDetails profileName={profile.name} profileId={profile.id} />
-        </div>
-
-        {/* CENTER COLUMN: Visuals (6/12) */}
-        <div className="col-span-1 md:col-span-12 xl:col-span-6 flex flex-col gap-6">
-          {/* Topology Map - Taller */}
-          <div className="h-[500px] w-full">
-            <GlobalMesh
-              state={appState}
-              isDbChaos={chaosState.dbOutage}
-              isNetworkChaos={chaosState.networkLoss}
-            />
-          </div>
-
-          {/* Traffic Table */}
-          <div className="h-[350px]">
-            <LiveTrafficTable />
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: Observability (3/12) */}
-        <div className="col-span-1 md:col-span-12 xl:col-span-3 flex flex-col gap-5">
-          {/* Real Time Analytics - More prominent now */}
-          <RealTimeAnalytics isCpuChaos={chaosState.cpuSpike} />
-
-          {/* Event Feed - Fixed height for scrollbar visibility */}
-          <div className="h-[500px]">
-            <NeuralTerminal />
-          </div>
-        </div>
-
-=======
         {/* BOTTOM ROW - Full width analytics */}
         <section className="mt-6">
           <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">
-            Resource Telemetry
+            Resource & Cost Telemetry
           </h2>
-          <RealTimeAnalytics />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RealTimeAnalytics isCpuChaos={chaosState.cpuSpike} />
+            <CostForecaster />
+          </div>
         </section>
->>>>>>> 84009beaf5ed01c12808009e0d3225ca919a3d46
       </main>
     </div>
   );
