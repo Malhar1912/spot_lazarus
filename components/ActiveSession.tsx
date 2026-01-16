@@ -26,104 +26,135 @@ const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, onCrash, onConnec
   useEffect(() => {
     const interval = setInterval(() => {
       setUptime(prev => prev + 1);
-      setSavings(prev => prev + (savingsPerSecond / 10)); // Update every 100ms for smoothness
+      setSavings(prev => prev + (savingsPerSecond / 10));
     }, 100);
     return () => clearInterval(interval);
   }, [savingsPerSecond]);
 
-
   return (
     <div className="flex flex-col min-h-screen bg-black">
-      {/* 1. TOP NAVIGATION BAR */}
-      <div className="bg-zinc-900/80 border-b border-zinc-800 backdrop-blur-md sticky top-0 z-40 px-6 py-3 flex justify-between items-center">
+      {/* HEADER - Simplified with better touch targets (min 44px) */}
+      <header className="bg-zinc-900/90 border-b border-zinc-800 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
 
-        {/* Left: Brand & Status */}
-        <div className="flex items-center gap-6">
-          <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">{profile.name}</h1>
-            <p className="text-zinc-500 flex items-center gap-2 text-xs font-mono">
-              <Link className="w-3 h-3" />
-              {profile.id}.internal.cloud
-            </p>
+          {/* Left: Instance Identity & Status */}
+          <div className="flex items-center gap-6">
+            <div>
+              <h1 className="text-lg font-bold text-white">{profile.name}</h1>
+              <p className="text-zinc-500 text-sm font-mono flex items-center gap-1.5">
+                <Link className="w-3.5 h-3.5" />
+                {profile.id}.internal.cloud
+              </p>
+            </div>
+
+            {/* Status Badge - Clear visibility of system status */}
+            <div className="flex items-center gap-3 bg-emerald-950/40 border border-emerald-800/50 px-4 py-2 rounded-lg">
+              <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-sm font-medium text-emerald-400">Online</span>
+              <span className="text-zinc-600">|</span>
+              <span className="flex items-center gap-1.5 text-sm text-zinc-400 font-mono">
+                <Clock className="w-3.5 h-3.5" />
+                {(uptime / 10).toFixed(0)}s
+              </span>
+            </div>
           </div>
 
-          <div className="h-8 w-px bg-zinc-800" /> {/* Divider */}
+          {/* Right: Actions - Larger touch targets (44px+ height) */}
+          <div className="flex items-center gap-4">
+            {/* Savings indicator - less prominent */}
+            <div className="flex items-center gap-2 px-4 py-2 text-zinc-400">
+              <TrendingUp size={16} className="text-green-400" />
+              <span className="text-sm font-mono">${savings.toFixed(4)}</span>
+            </div>
 
-          <div className="flex items-center gap-3 bg-emerald-950/30 border border-emerald-900/50 px-3 py-1.5 rounded-full">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-            <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Online</span>
-            <span className="text-zinc-600 text-xs">|</span>
-            <span className="flex items-center gap-1 text-xs text-zinc-400 font-mono">
-              <Clock className="w-3 h-3" /> {(uptime / 10).toFixed(0)}s
-            </span>
+            {/* Primary Actions - Clear visual hierarchy */}
+            <button
+              onClick={onConnect}
+              className="flex items-center gap-2 px-5 py-3 bg-white text-black rounded-lg hover:bg-zinc-200 transition-colors text-sm font-semibold min-h-[44px]"
+              title="Open SSH Terminal"
+            >
+              <Terminal size={18} />
+              Connect
+            </button>
+
+            <button
+              onClick={onCrash}
+              className="flex items-center gap-2 px-5 py-3 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition-colors text-sm font-medium min-h-[44px]"
+              title="Simulate a Spot Preemption Event"
+            >
+              <Zap size={18} />
+              <span className="hidden sm:inline">Simulate Crash</span>
+            </button>
+
+            <button
+              onClick={onStop}
+              className="flex items-center justify-center w-11 h-11 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+              title="Stop Instance"
+            >
+              <Power size={20} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* MAIN CONTENT - 2-Column Layout (8/4 split) following F-pattern scanning */}
+      <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          {/* PRIMARY COLUMN (8/12) - Main visual focus */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
+
+            {/* Topology Map - Hero element, most important visual */}
+            <section>
+              <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+                Network Topology
+              </h2>
+              <div className="h-[380px]">
+                <TopologyMap state={appState} />
+              </div>
+            </section>
+
+            {/* Live Traffic - Secondary visual */}
+            <section>
+              <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+                Request Traffic
+              </h2>
+              <div className="h-[320px]">
+                <LiveTrafficTable />
+              </div>
+            </section>
+          </div>
+
+          {/* SECONDARY COLUMN (4/12) - Supporting information */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
+
+            {/* Instance Details */}
+            <section>
+              <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+                Instance Info
+              </h2>
+              <InstanceDetails profileName={profile.name} profileId={profile.id} />
+            </section>
+
+            {/* System Events */}
+            <section>
+              <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+                Activity Log
+              </h2>
+              <div className="h-[400px]">
+                <SystemEventFeed />
+              </div>
+            </section>
           </div>
         </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 rounded-lg border border-zinc-800">
-            <TrendingUp size={14} className="text-green-400" />
-            <span className="text-xs text-zinc-400">Total Savings:</span>
-            <span className="text-sm font-bold text-white font-mono">${savings.toFixed(4)}</span>
-          </div>
-
-          <button
-            onClick={onCrash}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors text-sm font-medium"
-            title="Trigger a Spot Preemption event"
-          >
-            <Zap size={16} />
-            <span className="hidden sm:inline">Simulate Crash</span>
-          </button>
-          <button
-            onClick={onConnect}
-            className="flex items-center gap-2 px-4 py-2 bg-white text-black border border-zinc-200 rounded-lg hover:bg-zinc-200 transition-colors text-sm font-bold"
-          >
-            <Terminal size={16} />
-            Connect
-          </button>
-          <button
-            onClick={onStop}
-            className="flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-white transition-colors"
-          >
-            <Power className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* 2. MAIN DASHBOARD CONTENT */}
-      <main className="flex-1 p-6 grid grid-cols-1 md:grid-cols-12 gap-6 pb-20">
-
-        {/* LEFT COLUMN: Infrastructure (3/12) */}
-        <div className="col-span-1 md:col-span-12 xl:col-span-3 flex flex-col gap-5">
-          {/* Instance Details */}
-          <InstanceDetails profileName={profile.name} profileId={profile.id} />
-        </div>
-
-        {/* CENTER COLUMN: Visuals (6/12) */}
-        <div className="col-span-1 md:col-span-12 xl:col-span-6 flex flex-col gap-6">
-          {/* Topology Map - Taller */}
-          <div className="h-[500px] w-full">
-            <TopologyMap state={appState} />
-          </div>
-
-          {/* Traffic Table */}
-          <div className="h-[350px]">
-            <LiveTrafficTable />
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: Observability (3/12) */}
-        <div className="col-span-1 md:col-span-12 xl:col-span-3 flex flex-col gap-5">
-          {/* Real Time Analytics - More prominent now */}
+        {/* BOTTOM ROW - Full width analytics */}
+        <section className="mt-6">
+          <h2 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+            Resource Telemetry
+          </h2>
           <RealTimeAnalytics />
-
-          {/* Event Feed - Fixed height for scrollbar visibility */}
-          <div className="h-[500px]">
-            <SystemEventFeed />
-          </div>
-        </div>
-
+        </section>
       </main>
     </div>
   );
