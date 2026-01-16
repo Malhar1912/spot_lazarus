@@ -54,7 +54,7 @@ const ActiveSession: React.FC<ActiveSessionProps> = ({ onStop, onCrash, onConnec
     setChaosState(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Simulate Load & Scaling Logic
+  // Simulate Load & Scaling Logic why not
   useEffect(() => {
     const interval = setInterval(() => {
       // 1. Simulate CPU Load based on Chaos State
