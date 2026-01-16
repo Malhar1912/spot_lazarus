@@ -1,4 +1,4 @@
-export type EnvironmentState = 'OFFLINE' | 'DEPLOYING' | 'STARTING' | 'READY' | 'ACTIVE' | 'STOPPING' | 'SLEEPING';
+export type EnvironmentState = 'OFFLINE' | 'STARTING' | 'READY' | 'ACTIVE' | 'SLEEPING' | 'RECOVERING';
 
 export interface LogStep {
   id: string;

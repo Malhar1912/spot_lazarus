@@ -1,117 +1,71 @@
 import React from 'react';
-import { Shield, TrendingUp, TrendingDown } from 'lucide-react';
+import { Shield, Zap, TrendingUp } from 'lucide-react';
 
 interface ResilienceScoreProps {
-    score?: number;
-    uptimeBonus?: number;
-    spotRisk?: number;
+    score: number; // 0 to 100
 }
 
-const ResilienceScore: React.FC<ResilienceScoreProps> = ({
-    score = 92,
-    uptimeBonus = 15,
-    spotRisk = -5
-}) => {
-    const circumference = 2 * Math.PI * 45;
-    const strokeDashoffset = circumference - (score / 100) * circumference;
+export default function ResilienceScore({ score }: ResilienceScoreProps) {
+    // Determine color based on score
+    const getColor = (s: number) => {
+        if (s >= 80) return 'text-emerald-500';
+        if (s >= 50) return 'text-yellow-500';
+        return 'text-red-500';
+    };
+
+    const colorClass = getColor(score);
+    const strokeDash = 251.2; // 2 * PI * 40
+    const offset = strokeDash - (score / 100) * strokeDash;
 
     return (
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Resilience Score</h3>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 relative overflow-hidden flex flex-col items-center justify-center h-full">
+            <div className="absolute top-3 left-4 flex items-center gap-2">
+                <Shield size={16} className={colorClass} />
+                <span className="text-zinc-400 font-bold text-xs tracking-wider">RESILIENCE SCORE</span>
             </div>
 
-            {/* Score Ring */}
-            <div className="flex justify-center mb-4">
-                <div className="relative w-32 h-32">
-                    <svg className="w-full h-full transform -rotate-90">
-                        {/* Background Circle */}
-                        <circle
-                            cx="64"
-                            cy="64"
-                            r="45"
-                            fill="none"
-                            stroke="#27272a"
-                            strokeWidth="8"
-                        />
-                        {/* Progress Circle */}
-                        <circle
-                            cx="64"
-                            cy="64"
-                            r="45"
-                            fill="none"
-                            stroke="#10b981"
-                            strokeWidth="8"
-                            strokeLinecap="round"
-                            strokeDasharray={circumference}
-                            strokeDashoffset={strokeDashoffset}
-                            className="transition-all duration-1000"
-                        />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-4xl font-bold text-white">{score}</span>
-                        <span className="text-xs text-zinc-500">/ 100</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Metrics Row */}
-            <div className="grid grid-cols-2 gap-3">
-                <div className="bg-zinc-800/50 rounded-lg p-3 text-center">
-                    <div className="text-xs text-zinc-500 uppercase mb-1">Uptime Bonus</div>
-                    <div className="flex items-center justify-center gap-1">
-                        <TrendingUp className="w-4 h-4 text-emerald-400" />
-                        <span className="text-lg font-bold text-emerald-400">+{uptimeBonus}</span>
-                    </div>
-                </div>
-                <div className="bg-zinc-800/50 rounded-lg p-3 text-center">
-                    <div className="text-xs text-zinc-500 uppercase mb-1">Spot Risk</div>
-                    <div className="flex items-center justify-center gap-1">
-                        <TrendingDown className="w-4 h-4 text-red-400" />
-                        <span className="text-lg font-bold text-red-400">{spotRisk}</span>
-                    </div>
+            <div className="relative w-32 h-32 flex items-center justify-center mt-4">
+                {/* Background Circle */}
+                <svg className="w-full h-full transform -rotate-90">
+                    <circle
+                        cx="64"
+                        cy="64"
+                        r="40"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        fill="transparent"
+                        className="text-zinc-800"
+                    />
+                    {/* Progress Circle */}
+                    <circle
+                        cx="64"
+                        cy="64"
+                        r="40"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        fill="transparent"
+                        strokeDasharray={strokeDash}
+                        strokeDashoffset={offset}
+                        strokeLinecap="round"
+                        className={`${colorClass} transition-all duration-1000 ease-out`}
+                    />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className={`text-3xl font-bold ${colorClass}`}>{score}</span>
+                    <span className="text-[10px] text-zinc-500 uppercase">Points</span>
                 </div>
             </div>
 
-            {/* Throughput & Cost */}
-            <div className="grid grid-cols-2 gap-3 mt-3">
-                <div className="bg-zinc-800/50 rounded-lg p-3">
-                    <div className="text-xs text-zinc-500 uppercase mb-1">Throughput</div>
-                    <div className="text-2xl font-bold text-white">80<span className="text-sm text-zinc-500 ml-1">req/s</span></div>
+            <div className="mt-4 w-full grid grid-cols-2 gap-2">
+                <div className="bg-zinc-950/50 rounded p-2 text-center border border-zinc-800">
+                    <span className="block text-[10px] text-zinc-500 uppercase">Uptime Bonus</span>
+                    <span className="text-emerald-400 font-mono text-xs">+15</span>
                 </div>
-                <div className="bg-zinc-800/50 rounded-lg p-3">
-                    <div className="text-xs text-zinc-500 uppercase mb-1">Hourly</div>
-                    <div className="text-2xl font-bold text-emerald-400">$0.04</div>
-                    <div className="text-xs text-zinc-500">91% savings</div>
-                </div>
-            </div>
-
-            {/* Latency */}
-            <div className="mt-3 bg-zinc-800/50 rounded-lg p-3">
-                <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-zinc-500 uppercase">Latency</span>
-                    <span className="text-xs text-zinc-400">Δ%</span>
-                </div>
-                <div className="text-2xl font-bold text-white mb-2">100<span className="text-sm text-zinc-500 ml-1">ms</span></div>
-                <div className="flex gap-1">
-                    {[40, 60, 80, 70, 50].map((h, i) => (
-                        <div key={i} className="flex-1 bg-zinc-700 rounded-full h-8 relative overflow-hidden">
-                            <div
-                                className="absolute bottom-0 w-full bg-emerald-500 rounded-full transition-all"
-                                style={{ height: `${h}%` }}
-                            />
-                        </div>
-                    ))}
-                </div>
-                <div className="flex justify-between mt-2 text-xs text-zinc-600">
-                    <span>IDLE</span>
-                    <span>OFFLINE</span>
-                    <span>ACTIVE</span>
+                <div className="bg-zinc-950/50 rounded p-2 text-center border border-zinc-800">
+                    <span className="block text-[10px] text-zinc-500 uppercase">Spot Risk</span>
+                    <span className="text-yellow-400 font-mono text-xs">-5</span>
                 </div>
             </div>
         </div>
     );
-};
-
-export default ResilienceScore;
+}
