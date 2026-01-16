@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import { EnvironmentState, SimulationProfile } from './types';
 import { SIMULATION_PROFILES } from './constants';
-import { Server, Cpu, Database, Link, PlayCircle } from 'lucide-react';
+import { Server, Cpu, Database, PlayCircle } from 'lucide-react';
 import StartupSequence from './components/StartupSequence';
 import ActiveSession from './components/ActiveSession';
 import DockerBuildSim from './components/DockerBuildSim';
-import VMVisualizer from './components/VMVisualizer';
-import CostAnalytics from './components/CostAnalytics';
-import RealTimeAnalytics from './components/RealTimeAnalytics';
-import TopologyMap from './components/TopologyMap';
 import TerminalWindow from './components/TerminalWindow';
 
 function App() {
@@ -119,45 +115,15 @@ function App() {
         <StartupSequence logs={selectedProfile.startupSequence} onComplete={handleBootComplete} />
       )}
 
-      {/* 4. ACTIVE SESSION */}
+      {/* 4. ACTIVE SESSION  (NOW THE FULL DASHBOARD) */}
       {stage === 'ACTIVE' && (
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="flex justify-between items-center mb-8 border-b border-zinc-800 pb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">{selectedProfile.name}</h1>
-              <div className="flex items-center gap-2 text-green-400 font-mono text-sm">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                ENVIRONMENT RUNNING
-              </div>
-            </div>
-            <button
-              onClick={handleStop}
-              className="text-red-400 hover:text-red-300 text-sm font-medium px-4 py-2 border border-red-900/50 rounded-lg hover:bg-red-900/20 transition-colors"
-            >
-              TERMINATE SESSION
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column: Visuals & Metrics */}
-            <div className="space-y-8">
-              <TopologyMap state={appState} />
-              <VMVisualizer state={appState} />
-              <ActiveSession
-                profile={selectedProfile}
-                onStop={handleStop}
-                onCrash={handleSimulateCrash}
-                onConnect={() => setShowTerminal(true)}
-              />
-            </div>
-
-            {/* Right Column: Analytics */}
-            <div className="space-y-8">
-              <RealTimeAnalytics />
-              <CostAnalytics data={selectedProfile.costComparison.monthlyData} />
-            </div>
-          </div>
-        </div>
+        <ActiveSession
+          profile={selectedProfile}
+          appState={appState}
+          onStop={handleStop}
+          onCrash={handleSimulateCrash}
+          onConnect={() => setShowTerminal(true)}
+        />
       )}
 
       {showTerminal && <TerminalWindow onClose={() => setShowTerminal(false)} />}
